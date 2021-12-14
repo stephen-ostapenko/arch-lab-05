@@ -1,7 +1,6 @@
 // build this with -O2
 
 #include <omp.h>
-
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -15,7 +14,25 @@
 #include <stdexcept>
 #include <cerrno>
 
-#define SCHEDULE_ARGS static, 1
+// === used for testing =======================================================
+
+#ifndef _OPENMP
+
+int omp_get_thread_num() {
+	return 0;
+}
+
+int omp_get_max_threads() {
+	return 1;
+}
+
+void omp_set_num_threads(int threads) {
+	(void)threads;
+}
+
+#endif
+
+#define SCHEDULE_ARGS static
 
 // ============================================================================
 
@@ -418,9 +435,10 @@ void process_P5(std::istream &in, std::ostream &out, double k, unsigned int thre
 		" ms" << std::endl;
 
 	if (!changed) {
-		std::cerr << "Notice: there are too few pixels left in picture" << std::endl <<
+		std::cerr << "Notice: after ignoring some brightest and darkest pixels" << std::endl <<
+					 "        there are too few of them left in the picture" << std::endl <<
 					 "        to process auto-contrasting," << std::endl <<
-					 "        so nothing changed in this picture" << std::endl;
+					 "        so nothing changed in this picture." << std::endl;
 	}
 
 	p.write(out);
@@ -440,9 +458,10 @@ void process_P6(std::istream &in, std::ostream &out, double k, unsigned int thre
 		" ms" << std::endl;
 
 	if (!changed) {
-		std::cerr << "Notice: there are too few pixels left in picture" << std::endl <<
+		std::cerr << "Notice: after ignoring some brightest and darkest pixels" << std::endl <<
+					 "        there are too few of them left in the picture" << std::endl <<
 					 "        to process auto-contrasting," << std::endl <<
-					 "        so nothing changed in this picture" << std::endl;
+					 "        so nothing changed in this picture." << std::endl;
 	}
 
 	p.write(out);
