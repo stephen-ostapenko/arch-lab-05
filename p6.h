@@ -18,15 +18,15 @@ struct P6_picture {
 		unsigned int red, green, blue;
 	};
 
-	static unsigned int get_red(Pixel &p) {
+	static unsigned int& get_red(Pixel &p) {
 		return p.red;
 	}
 
-	static unsigned int get_green(Pixel &p) {
+	static unsigned int& get_green(Pixel &p) {
 		return p.green;
 	}
 
-	static unsigned int get_blue(Pixel &p) {
+	static unsigned int& get_blue(Pixel &p) {
 		return p.blue;
 	}
 
@@ -35,19 +35,19 @@ struct P6_picture {
 
 	P6_picture() {}
 
-	Pixel& get(unsigned int i, unsigned int j) {
+	inline Pixel& get(unsigned int i, unsigned int j) {
 		return pic[i * m + j];
 	}
 
-	unsigned int& get_r(unsigned int i, unsigned int j) {
+	inline unsigned int& get_r(unsigned int i, unsigned int j) {
 		return pic[i * m + j].red;
 	}
 
-	unsigned int& get_g(unsigned int i, unsigned int j) {
+	inline unsigned int& get_g(unsigned int i, unsigned int j) {
 		return pic[i * m + j].green;
 	}
 
-	unsigned int& get_b(unsigned int i, unsigned int j) {
+	inline unsigned int& get_b(unsigned int i, unsigned int j) {
 		return pic[i * m + j].blue;
 	}
 
@@ -109,7 +109,7 @@ struct P6_picture {
 		}
 	}
 
-	std::pair <unsigned int, unsigned int> find_min_and_max_bound_for_one_color(unsigned int skip, unsigned int (*get_color)(Pixel&), unsigned int color_bound, unsigned int threads) {
+	std::pair <unsigned int, unsigned int> find_min_and_max_bound_for_one_color(unsigned int skip, unsigned int& (*get_color)(Pixel&), unsigned int color_bound, unsigned int threads) {
 		std::vector <std::vector <unsigned long long>> cnt(threads, std::vector <unsigned long long> (color_bound, 0));
 
 		#pragma omp parallel for schedule(SCHEDULE_ARGS) shared(cnt)
@@ -159,60 +159,44 @@ struct P6_picture {
 		return std::make_pair(std::min({ans_r.first, ans_g.first, ans_b.first}), std::max({ans_r.second, ans_g.second, ans_b.second}));
 	}
 
+	inline void transform_pixel(Pixel &p, unsigned int mn, unsigned int mx, float range, unsigned int& (*get_color)(Pixel&), unsigned int color_bound) {
+		unsigned int max_color = color_bound - 1;
+		if (get_color(p) <= mn) {
+			get_color(p) = 0;
+		} else if (get_color(p) >= mx) {
+			get_color(p) = max_color;
+		} else {
+			unsigned int tmp = round((get_color(p) - mn) * max_color / range);
+			if (tmp < max_color) {
+				get_color(p) = tmp;
+			} else {
+				get_color(p) = max_color;
+			}
+		}
+	}
+
 	void transform(unsigned int mn, unsigned int mx, unsigned int threads) {
 		(void)threads;
-		double range = mx - mn;
+		float range = mx - mn;
 
 		if (n <= m) {
 			for (unsigned int i = 0; i < n; i++) {
 				#pragma omp parallel for schedule(SCHEDULE_ARGS)
 				for (unsigned int j = 0; j < m; j++) {
-					if (get_r(i, j) <= mn) {
-						get_r(i, j) = 0;
-					} else {
-						get_r(i, j) = round((get_r(i, j) - mn) * (RED_BOUND - 1) / range);
-						get_r(i, j) = std::min(get_r(i, j), (RED_BOUND - 1));
-					}
-
-					if (get_g(i, j) <= mn) {
-						get_g(i, j) = 0;
-					} else {
-						get_g(i, j) = round((get_g(i, j) - mn) * (GREEN_BOUND - 1) / range);
-						get_g(i, j) = std::min(get_g(i, j), (GREEN_BOUND - 1));
-					}
-
-					if (get_b(i, j) <= mn) {
-						get_b(i, j) = 0;
-					} else {
-						get_b(i, j) = round((get_b(i, j) - mn) * (BLUE_BOUND - 1) / range);
-						get_b(i, j) = std::min(get_b(i, j), (BLUE_BOUND - 1));
-					}
+					Pixel &p = get(i, j);
+					transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
+					transform_pixel(p, mn, mx, range, get_green, GREEN_BOUND);
+					transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
 				}
 			}
 		} else {
 			#pragma omp parallel for schedule(SCHEDULE_ARGS)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
-					if (get_r(i, j) <= mn) {
-						get_r(i, j) = 0;
-					} else {
-						get_r(i, j) = round((get_r(i, j) - mn) * (RED_BOUND - 1) / range);
-						get_r(i, j) = std::min(get_r(i, j), (RED_BOUND - 1));
-					}
-
-					if (get_g(i, j) <= mn) {
-						get_g(i, j) = 0;
-					} else {
-						get_g(i, j) = round((get_g(i, j) - mn) * (GREEN_BOUND - 1) / range);
-						get_g(i, j) = std::min(get_g(i, j), (GREEN_BOUND - 1));
-					}
-
-					if (get_b(i, j) <= mn) {
-						get_b(i, j) = 0;
-					} else {
-						get_b(i, j) = round((get_b(i, j) - mn) * (BLUE_BOUND - 1) / range);
-						get_b(i, j) = std::min(get_b(i, j), (BLUE_BOUND - 1));
-					}
+					Pixel &p = get(i, j);
+					transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
+					transform_pixel(p, mn, mx, range, get_green, GREEN_BOUND);
+					transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
 				}
 			}
 		}

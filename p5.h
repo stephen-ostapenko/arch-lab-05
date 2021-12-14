@@ -21,7 +21,11 @@ struct P5_picture {
 
 	P5_picture() {}
 
-	unsigned int& get(unsigned int i, unsigned int j) {
+	inline Pixel& get(unsigned int i, unsigned int j) {
+		return pic[i * m + j];
+	}
+
+	inline unsigned int& get_br(unsigned int i, unsigned int j) {
 		return pic[i * m + j].br;
 	}
 
@@ -38,7 +42,7 @@ struct P5_picture {
 		for (unsigned int i = 0; i < n; i++) {
 			for (unsigned int j = 0; j < m; j++) {
 				unsigned char c = in.get();
-				get(i, j) = c;
+				get_br(i, j) = c;
 			}
 		}
 
@@ -58,7 +62,7 @@ struct P5_picture {
 
 		for (unsigned int i = 0; i < n; i++) {
 			for (unsigned int j = 0; j < m; j++) {
-				unsigned char c = get(i, j);
+				unsigned char c = get_br(i, j);
 				out.put(c);
 			}
 		}
@@ -76,7 +80,7 @@ struct P5_picture {
 		for (unsigned int i = 0; i < n; i++) {
 			for (unsigned int j = 0; j < m; j++) {
 				unsigned int th = omp_get_thread_num();
-				cnt[th][get(i, j)]++;
+				cnt[th][get_br(i, j)]++;
 			}
 		}
 
@@ -111,32 +115,38 @@ struct P5_picture {
 		return std::make_pair(mn, mx);
 	}
 
+	inline void transform_pixel(Pixel &p, unsigned int mn, unsigned int mx, float range) {
+		unsigned int max_brightness = BRIGHTNESS_BOUND - 1;
+		if (p.br <= mn) {
+			p.br = 0;
+		} else if (p.br >= mx) {
+			p.br = max_brightness;
+		} else {
+			unsigned int tmp = round((p.br - mn) * max_brightness / range);
+			if (tmp < max_brightness) {
+				p.br = tmp;
+			} else {
+				p.br = max_brightness;
+			}
+		}
+	}
+
 	void transform(unsigned int mn, unsigned int mx, unsigned int threads) {
 		(void)threads;
-		double range = mx - mn;
+		float range = mx - mn;
 
 		if (n <= m) {
 			for (unsigned int i = 0; i < n; i++) {
 				#pragma omp parallel for schedule(SCHEDULE_ARGS)
 				for (unsigned int j = 0; j < m; j++) {
-					if (get(i, j) <= mn) {
-						get(i, j) = 0;
-					} else {
-						get(i, j) = round((get(i, j) - mn) * (BRIGHTNESS_BOUND - 1) / range);
-						get(i, j) = std::min(get(i, j), (BRIGHTNESS_BOUND - 1));
-					}
+					transform_pixel(get(i, j), mn, mx, range);
 				}
 			}
 		} else {
 			#pragma omp parallel for schedule(SCHEDULE_ARGS)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
-					if (get(i, j) <= mn) {
-						get(i, j) = 0;
-					} else {
-						get(i, j) = round((get(i, j) - mn) * (BRIGHTNESS_BOUND - 1) / range);
-						get(i, j) = std::min(get(i, j), (BRIGHTNESS_BOUND - 1));
-					}
+					transform_pixel(get(i, j), mn, mx, range);
 				}
 			}
 		}
