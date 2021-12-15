@@ -112,7 +112,7 @@ struct P6_picture {
 	std::pair <unsigned int, unsigned int> find_min_and_max_bound_for_one_color(unsigned int skip, unsigned int& (*get_color)(Pixel&), unsigned int color_bound, unsigned int threads) {
 		std::vector <std::vector <unsigned long long>> cnt(threads, std::vector <unsigned long long> (color_bound, 0));
 
-		#pragma omp parallel for schedule(SCHEDULE_ARGS) shared(cnt)
+		#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) shared(cnt, get_color)
 		for (unsigned int i = 0; i < n; i++) {
 			for (unsigned int j = 0; j < m; j++) {
 				unsigned int th = omp_get_thread_num();
@@ -122,7 +122,7 @@ struct P6_picture {
 
 		std::vector <unsigned long long> cnt_all(color_bound, 0);
 		for (unsigned int i = 0; i < threads; i++) {
-			#pragma omp parallel for schedule(SCHEDULE_ARGS) shared(cnt, cnt_all)
+			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, color_bound) shared(cnt, cnt_all)
 			for (unsigned int j = 0; j < color_bound; j++) {
 				cnt_all[j] += cnt[i][j];
 			}
@@ -181,7 +181,7 @@ struct P6_picture {
 
 		if (n <= m) {
 			for (unsigned int i = 0; i < n; i++) {
-				#pragma omp parallel for schedule(SCHEDULE_ARGS)
+				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
 				for (unsigned int j = 0; j < m; j++) {
 					Pixel &p = get(i, j);
 					transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
@@ -190,7 +190,7 @@ struct P6_picture {
 				}
 			}
 		} else {
-			#pragma omp parallel for schedule(SCHEDULE_ARGS)
+			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
 					Pixel &p = get(i, j);

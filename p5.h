@@ -76,7 +76,7 @@ struct P5_picture {
 	std::pair <unsigned int, unsigned int> find_min_and_max_bound(unsigned int skip, unsigned int threads) {
 		std::vector <std::vector <unsigned long long>> cnt(threads, std::vector <unsigned long long> (BRIGHTNESS_BOUND, 0));
 
-		#pragma omp parallel for schedule(SCHEDULE_ARGS) shared(cnt)
+		#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) shared(cnt)
 		for (unsigned int i = 0; i < n; i++) {
 			for (unsigned int j = 0; j < m; j++) {
 				unsigned int th = omp_get_thread_num();
@@ -86,7 +86,7 @@ struct P5_picture {
 
 		std::vector <unsigned long long> cnt_all(BRIGHTNESS_BOUND, 0);
 		for (unsigned int i = 0; i < threads; i++) {
-			#pragma omp parallel for schedule(SCHEDULE_ARGS) shared(cnt, cnt_all)
+			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i) shared(cnt, cnt_all)
 			for (unsigned int j = 0; j < BRIGHTNESS_BOUND; j++) {
 				cnt_all[j] += cnt[i][j];
 			}
@@ -137,13 +137,13 @@ struct P5_picture {
 
 		if (n <= m) {
 			for (unsigned int i = 0; i < n; i++) {
-				#pragma omp parallel for schedule(SCHEDULE_ARGS)
+				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
 				for (unsigned int j = 0; j < m; j++) {
 					transform_pixel(get(i, j), mn, mx, range);
 				}
 			}
 		} else {
-			#pragma omp parallel for schedule(SCHEDULE_ARGS)
+			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
 					transform_pixel(get(i, j), mn, mx, range);
