@@ -33,7 +33,7 @@ function invoke {
 # (static)
 echo "=== (static) ====================================================================="
 echo
-g++ main.cpp -DST -DCH_0 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DST -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
@@ -43,7 +43,7 @@ invoke $1
 # (static, 1)
 echo "=== (static, 1) =================================================================="
 echo
-g++ main.cpp -DST -DCH_1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DST -DCHSZ=1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
@@ -53,7 +53,7 @@ invoke $1
 # (static, 8)
 echo "=== (static, 8) =================================================================="
 echo
-g++ main.cpp -DST -DCH_8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DST -DCHSZ=8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
@@ -63,7 +63,7 @@ invoke $1
 # (dynamic)
 echo "=== (dynamic) ===================================================================="
 echo
-g++ main.cpp -DDYN -DCH_0 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DDYN -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
@@ -73,7 +73,7 @@ invoke $1
 # (dynamic, 1)
 echo "=== (dynamic, 1) ================================================================="
 echo
-g++ main.cpp -DDYN -DCH_1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DDYN -DCHSZ=1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
@@ -83,7 +83,7 @@ invoke $1
 # (dynamic, 8)
 echo "=== (dynamic, 8) ================================================================="
 echo
-g++ main.cpp -DDYN -DCH_8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
+g++ main.cpp -DDYN -DCHSZ=8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
