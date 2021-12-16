@@ -6,6 +6,11 @@ then
 	exit 1
 fi
 
+if [[ ! -f "test_picture.pnm" ]]
+then
+	unzip test_picture.zip
+fi
+
 T=2
 
 rm $1

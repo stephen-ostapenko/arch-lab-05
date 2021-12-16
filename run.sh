@@ -6,4 +6,4 @@ then
 	exit 1
 fi
 
-./main $1 inputs/i16.pnm outputs/o16.pnm >> $2
+./main $1 test_picture.pnm test_output.pnm >> $2
