@@ -21,74 +21,69 @@ function invoke {
 		done
 
 		echo >> $1
-		echo "\n===\n"
+		echo -e "\n===\n"
 	done
 
-	echo "\n============\n"
+	echo >> $1
+	echo -e "\n============\n"
 }
 
 #########################################################################################
 
 # (static)
 echo "=== (static) ====================================================================="
+echo
 g++ main.cpp -DST -DCH_0 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
 
-echo >> $1
-
 #########################################################################################
 
 # (static, 1)
 echo "=== (static, 1) =================================================================="
+echo
 g++ main.cpp -DST -DCH_1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
 
-echo >> $1
-
 #########################################################################################
 
 # (static, 8)
 echo "=== (static, 8) =================================================================="
+echo
 g++ main.cpp -DST -DCH_8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
 
-echo >> $1
-
 #########################################################################################
 
 # (dynamic)
 echo "=== (dynamic) ===================================================================="
+echo
 g++ main.cpp -DDYN -DCH_0 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
 
-echo >> $1
-
 #########################################################################################
 
 # (dynamic, 1)
 echo "=== (dynamic, 1) ================================================================="
+echo
 g++ main.cpp -DDYN -DCH_1 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
 
-echo >> $1
-
 #########################################################################################
 
 # (dynamic, 8)
 echo "=== (dynamic, 8) ================================================================="
+echo
 g++ main.cpp -DDYN -DCH_8 -Wall -Wextra -pedantic -fopenmp -g -O2 -o main
 sleep $T
 
 invoke $1
-
-echo >> $1
