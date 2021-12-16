@@ -166,12 +166,7 @@ struct P6_picture {
 		} else if (get_color(p) >= mx) {
 			get_color(p) = max_color;
 		} else {
-			unsigned int tmp = round((get_color(p) - mn) * max_color / range);
-			if (tmp < max_color) {
-				get_color(p) = tmp;
-			} else {
-				get_color(p) = max_color;
-			}
+			get_color(p) = (unsigned int)round((get_color(p) - mn) * max_color / range);
 		}
 	}
 
@@ -179,17 +174,7 @@ struct P6_picture {
 		(void)threads;
 		float range = mx - mn;
 
-		if (n <= m) {
-			for (unsigned int i = 0; i < n; i++) {
-				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
-				for (unsigned int j = 0; j < m; j++) {
-					Pixel &p = get(i, j);
-					transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
-					transform_pixel(p, mn, mx, range, get_green, GREEN_BOUND);
-					transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
-				}
-			}
-		} else {
+		#if SCHEDULE_TYPE == dynamic
 			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
@@ -199,7 +184,29 @@ struct P6_picture {
 					transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
 				}
 			}
-		}
+		#else
+			if (n <= m) {
+				for (unsigned int i = 0; i < n; i++) {
+					#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
+					for (unsigned int j = 0; j < m; j++) {
+						Pixel &p = get(i, j);
+						transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
+						transform_pixel(p, mn, mx, range, get_green, GREEN_BOUND);
+						transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
+					}
+				}
+			} else {
+				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
+				for (unsigned int i = 0; i < n; i++) {
+					for (unsigned int j = 0; j < m; j++) {
+						Pixel &p = get(i, j);
+						transform_pixel(p, mn, mx, range, get_red, RED_BOUND);
+						transform_pixel(p, mn, mx, range, get_green, GREEN_BOUND);
+						transform_pixel(p, mn, mx, range, get_blue, BLUE_BOUND);
+					}
+				}
+			}
+		#endif
 	}
 
 	bool contrast(double k, unsigned int threads) {

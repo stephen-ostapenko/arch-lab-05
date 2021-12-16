@@ -122,12 +122,7 @@ struct P5_picture {
 		} else if (p.br >= mx) {
 			p.br = max_brightness;
 		} else {
-			unsigned int tmp = round((p.br - mn) * max_brightness / range);
-			if (tmp < max_brightness) {
-				p.br = tmp;
-			} else {
-				p.br = max_brightness;
-			}
+			p.br = (unsigned int)round((p.br - mn) * max_brightness / range);
 		}
 	}
 
@@ -135,21 +130,30 @@ struct P5_picture {
 		(void)threads;
 		float range = mx - mn;
 
-		if (n <= m) {
-			for (unsigned int i = 0; i < n; i++) {
-				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
-				for (unsigned int j = 0; j < m; j++) {
-					transform_pixel(get(i, j), mn, mx, range);
-				}
-			}
-		} else {
+		#if SCHEDULE_TYPE == dynamic
 			#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
 			for (unsigned int i = 0; i < n; i++) {
 				for (unsigned int j = 0; j < m; j++) {
 					transform_pixel(get(i, j), mn, mx, range);
 				}
 			}
-		}
+		#else
+			if (n <= m) {
+				for (unsigned int i = 0; i < n; i++) {
+					#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(i, mn, mx, range)
+					for (unsigned int j = 0; j < m; j++) {
+						transform_pixel(get(i, j), mn, mx, range);
+					}
+				}
+			} else {
+				#pragma omp parallel for schedule(SCHEDULE_ARGS) default(none) firstprivate(mn, mx, range)
+				for (unsigned int i = 0; i < n; i++) {
+					for (unsigned int j = 0; j < m; j++) {
+						transform_pixel(get(i, j), mn, mx, range);
+					}
+				}
+			}
+		#endif
 	}
 
 	bool contrast(double k, unsigned int threads) {

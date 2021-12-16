@@ -3,6 +3,19 @@
 #include <omp.h>
 #include <stdexcept>
 
+#define SCHEDULE_TYPE static
+//#define SCHEDULE_CHUNK_SIZE
+
+#ifdef SCHEDULE_CHUNK_SIZE
+
+#define SCHEDULE_ARGS SCHEDULE_TYPE, SCHEDULE_CHUNK_SIZE
+
+#else
+
+#define SCHEDULE_ARGS SCHEDULE_TYPE
+
+#endif
+
 #ifndef _OPENMP
 
 int omp_get_thread_num() {
@@ -18,8 +31,6 @@ void omp_set_num_threads(int threads) {
 }
 
 #endif
-
-#define SCHEDULE_ARGS static
 
 // ============================================================================
 
