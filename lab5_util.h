@@ -3,18 +3,6 @@
 #include <omp.h>
 #include <stdexcept>
 
-#ifdef ST
-#define SCHEDULE_TYPE static
-#endif
-
-#ifdef DYN
-#define SCHEDULE_TYPE dynamic
-#endif
-
-#ifdef CHSZ
-#define SCHEDULE_CHUNK_SIZE CHSZ
-#endif
-
 #ifdef SCHEDULE_CHUNK_SIZE
 #define SCHEDULE_ARGS SCHEDULE_TYPE, SCHEDULE_CHUNK_SIZE
 #else
