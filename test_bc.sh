@@ -6,7 +6,7 @@ then
 	exit 1
 fi
 
-T=5
+T=2
 
 rm $1
 
