@@ -25,8 +25,6 @@ void omp_set_num_threads(int threads) {
 
 #endif
 
-// ============================================================================
-
 class invalid_file_format : public std::runtime_error {
 public:
 	invalid_file_format(const char *msg): std::runtime_error(msg) {}
