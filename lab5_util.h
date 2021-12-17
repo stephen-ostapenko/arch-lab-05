@@ -8,6 +8,7 @@
 #else
 #define SCHEDULE_ARGS SCHEDULE_TYPE
 #endif
+
 #ifndef _OPENMP
 
 int omp_get_thread_num() {
