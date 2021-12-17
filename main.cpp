@@ -29,13 +29,6 @@ void process_P5(std::istream &in, std::ostream &out, double k, unsigned int thre
 
 	std::cout << std::chrono::duration_cast <std::chrono::milliseconds> (end - start).count() << ",";
 
-	if (!changed) {
-		std::cerr << "Notice: after ignoring some brightest and darkest pixels" << std::endl <<
-					 "        there are too few of them left in the picture" << std::endl <<
-					 "        to process auto-contrasting," << std::endl <<
-					 "        so nothing changed in this picture." << std::endl;
-	}
-
 	p.write(out);
 }
 
@@ -53,13 +46,6 @@ void process_P6(std::istream &in, std::ostream &out, double k, unsigned int thre
 		" ms" << std::endl;
 
 	std::cout << std::chrono::duration_cast <std::chrono::milliseconds> (end - start).count() << ",";
-
-	if (!changed) {
-		std::cerr << "Notice: after ignoring some brightest and darkest pixels" << std::endl <<
-					 "        there are too few of them left in the picture" << std::endl <<
-					 "        to process auto-contrasting," << std::endl <<
-					 "        so nothing changed in this picture." << std::endl;
-	}
 
 	p.write(out);
 }
